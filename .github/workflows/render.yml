@@ -44,6 +44,8 @@ jobs:
 
       - name: Install the project
         working-directory: three-remotion
+        env:
+          NPM_CONFIG_LEGACY_PEER_DEPS: "true"
         run: bash setup.sh
 
       - name: Make the voiceover
