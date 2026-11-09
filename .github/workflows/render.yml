@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       quality:
-        description: "draft = small and fast, full = final quality"
+        description: "draft = half size and fast, full = final quality"
         type: choice
         options: [draft, full]
         default: draft
@@ -13,10 +13,14 @@ on:
         type: choice
         options: [vertical, wide]
         default: vertical
+      captions:
+        description: "Burn captions into the video (leave off if you will caption in CapCut)"
+        type: boolean
+        default: false
       voice:
         description: "Make a real voiceover with ElevenLabs (needs the ELEVENLABS_API_KEY secret)"
         type: boolean
-        default: true
+        default: false
 
 jobs:
   render:
@@ -64,8 +68,10 @@ jobs:
       - name: Render
         working-directory: three-remotion
         run: |
-          ARGS="--gl=swangle"
-          if [ "${{ inputs.format }}" = "wide" ]; then ARGS="$ARGS --props=props-wide.json"; fi
+          VERT=true
+          if [ "${{ inputs.format }}" = "wide" ]; then VERT=false; fi
+          echo "{\"vertical\": $VERT, \"showCaptions\": ${{ inputs.captions }}}" > props-run.json
+          ARGS="--gl=swangle --props=props-run.json"
           if [ "${{ inputs.quality }}" = "draft" ]; then ARGS="$ARGS --scale=0.5"; fi
           npx remotion render src/index.ts MainVideo out/video.mp4 $ARGS
 
